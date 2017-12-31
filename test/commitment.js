@@ -65,6 +65,28 @@ contract('Commitment', (accounts) => {
         assert.equal(goalCompleted, false);
       });
     });
+
+    it('third parties cannot set the goal completed', () => {
+      let commitment;
+      return Commitment.new(accounts[1]).then((instance) => {
+        commitment = instance;
+        return commitment.goalCompleted.call();
+      }).then((goalCompleted) => {
+        assert.equal(goalCompleted, false);
+        return commitment.setGoalCompleted({from: accounts[2]});
+      }).then(
+        (tx) => {
+          assert(false, 'owner should not be authorized to set goal completed');
+        },
+        (error) => {
+          assert.match(error, /VM Exception while processing transaction: revert/);
+        }
+      ).then(() => {
+        return commitment.goalCompleted.call();
+      }).then((goalCompleted) => {
+        assert.equal(goalCompleted, false);
+      });
+    });
   });
 
 });

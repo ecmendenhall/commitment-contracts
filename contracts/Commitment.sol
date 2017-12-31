@@ -11,8 +11,12 @@ contract Commitment {
     goalCompleted = false;
   }
 
-  function setGoalCompleted() public {
-    require(msg.sender == referee);
+  modifier onlyBy(address _role) {
+    require(msg.sender == _role);
+    _;
+  }
+
+  function setGoalCompleted() public onlyBy(referee) {
     goalCompleted = true;
   }
 
