@@ -22,10 +22,16 @@ contract Commitment {
 
   function setGoalCompleted() public onlyBy(referee) {
     goalCompleted = true;
+    if (!this.termExpired()) {
+      address contractAddress = this;
+      owner.transfer(contractAddress.balance);
+    }
   }
 
   function termExpired() public view returns (bool) {
     return now >= (createdAt + term);
   }
+
+  function() public payable { }
 
 }

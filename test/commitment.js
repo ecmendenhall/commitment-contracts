@@ -87,6 +87,60 @@ contract('Commitment', (accounts) => {
         assert.equal(goalCompleted, false);
       });
     });
+
+    it('sends contract balance back to owner if term is not expired', () => {
+      let commitment;
+      let startingBalance;
+      return Commitment.new(accounts[1], 1).then((instance) => {
+        commitment = instance;
+        return web3.eth.getBalance(accounts[0]);
+      }).then((ownerBalance) => {
+        startingBalance = ownerBalance;
+        return commitment.send(web3.toWei(1, 'ether'));
+      }).then((tx) => {
+        return web3.eth.getBalance(commitment.address);
+      }).then((contractBalance) => {
+        assert.equal(contractBalance, web3.toWei(1, 'ether'));
+        return commitment.setGoalCompleted({from: accounts[1]});
+      }).then((tx) => {
+        return web3.eth.getBalance(commitment.address);
+      }).then((contractBalance) => {
+        assert.equal(contractBalance.valueOf(), 0);
+        return web3.eth.getBalance(accounts[0]);
+      }).then((ownerBalance) => {
+        let balanceChange = startingBalance.minus(ownerBalance);
+        let balanceChangeInEth = web3.fromWei(balanceChange, 'ether').toNumber();
+        assert.isAbove(balanceChangeInEth, 0);
+        assert.isBelow(balanceChangeInEth, 0.0025);
+      });
+    });
+
+    it('does not send contract balance back to owner if term is expired', () => {
+      let commitment;
+      let startingBalance;
+      return Commitment.new(accounts[1], 0).then((instance) => {
+        commitment = instance;
+        return web3.eth.getBalance(accounts[0]);
+      }).then((ownerBalance) => {
+        startingBalance = ownerBalance;
+        return commitment.send(web3.toWei(1, 'ether'));
+      }).then((tx) => {
+        return web3.eth.getBalance(commitment.address);
+      }).then((contractBalance) => {
+        assert.equal(contractBalance, web3.toWei(1, 'ether'));
+        return commitment.setGoalCompleted({from: accounts[1]});
+      }).then((tx) => {
+        return web3.eth.getBalance(commitment.address);
+      }).then((contractBalance) => {
+        assert.equal(contractBalance, web3.toWei(1, 'ether'));
+        return web3.eth.getBalance(accounts[0]);
+      }).then((ownerBalance) => {
+        let balanceChange = startingBalance.minus(ownerBalance);
+        let balanceChangeInEth = web3.fromWei(balanceChange, 'ether').toNumber();
+        assert.isAbove(balanceChangeInEth, 1.0);
+        assert.isBelow(balanceChangeInEth, 1.0025);
+      });
+    });
   });
 
   describe('term', () => {
@@ -122,6 +176,20 @@ contract('Commitment', (accounts) => {
         }).then((expired) => {
           assert.equal(expired, false);
         });
+      });
+    });
+  });
+
+  describe('payment', () => {
+    it('is payable', () => {
+      let commitment;
+      return Commitment.new(accounts[1], 1).then((instance) => {
+        commitment = instance;
+        return commitment.send(web3.toWei(1, 'ether'));
+      }).then((tx) => {
+        return web3.eth.getBalance(commitment.address);
+      }).then((balance) => {
+        assert.equal(web3.fromWei(balance, 'ether').valueOf(), '1');
       });
     });
   });
