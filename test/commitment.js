@@ -10,4 +10,12 @@ contract('Commitment', (accounts) => {
     });
   });
 
+  it('has a referee', () => {
+    return Commitment.new(accounts[1]).then((instance) => {
+      return instance.referee.call();
+    }).then((value) => {
+      assert.equal(value, accounts[1]);
+    });
+  });
+
 });
