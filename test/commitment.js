@@ -28,6 +28,36 @@ contract('Commitment', (accounts) => {
         assert.equal(goalCompleted, false);
       });
     });
+
+    it('the referee can set the goal completed', () => {
+      let commitment;
+      return Commitment.new(accounts[1]).then((instance) => {
+        commitment = instance;
+        return commitment.goalCompleted.call();
+      }).then((goalCompleted) => {
+        assert.equal(goalCompleted, false);
+        return commitment.setGoalCompleted({from: accounts[1]});
+      }).then((tx) => {
+        return commitment.goalCompleted.call();
+      }).then((goalCompleted) => {
+        assert.equal(goalCompleted, true);
+      });
+    });
+
+    it('the owner cannot set the goal completed', () => {
+      let commitment;
+      return Commitment.new(accounts[1]).then((instance) => {
+        commitment = instance;
+        return commitment.goalCompleted.call();
+      }).then((goalCompleted) => {
+        assert.equal(goalCompleted, false);
+        return commitment.setGoalCompleted({from: accounts[0]});
+      }).then((tx) => {
+        return commitment.goalCompleted.call();
+      }).then((goalCompleted) => {
+        assert.equal(goalCompleted, false);
+      });
+    });
   });
 
 });
