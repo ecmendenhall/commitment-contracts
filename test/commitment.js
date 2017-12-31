@@ -2,9 +2,11 @@ const Commitment = artifacts.require('Commitment');
 
 contract('Commitment', (accounts) => {
 
-  it('exists', () => {
+  it('has an owner', () => {
     return Commitment.new().then((instance) => {
-      assert.isNotNull(instance);
+      return instance.owner.call();
+    }).then((value) => {
+      assert.equal(value, accounts[0]);
     });
   });
 
