@@ -52,7 +52,14 @@ contract('Commitment', (accounts) => {
       }).then((goalCompleted) => {
         assert.equal(goalCompleted, false);
         return commitment.setGoalCompleted({from: accounts[0]});
-      }).then((tx) => {
+      }).then(
+        (tx) => {
+          assert(false, 'owner should not be authorized to set goal completed');
+        },
+        (error) => {
+          assert.match(error, /VM Exception while processing transaction: revert/);
+        }
+      ).then(() => {
         return commitment.goalCompleted.call();
       }).then((goalCompleted) => {
         assert.equal(goalCompleted, false);

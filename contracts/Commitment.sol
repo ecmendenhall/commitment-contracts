@@ -12,9 +12,8 @@ contract Commitment {
   }
 
   function setGoalCompleted() public {
-    if (msg.sender == referee) {
-      goalCompleted = true;
-    } 
+    require(msg.sender == referee);
+    goalCompleted = true;
   }
 
 }
